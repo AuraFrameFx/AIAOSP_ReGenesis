@@ -1,0 +1,1 @@
+    open fun getCapabilities(): List<String> = emptyList()
