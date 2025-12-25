@@ -1,5 +1,9 @@
 package dev.aurakai.auraframefx.cascade
 
+import dev.aurakai.auraframefx.ai.agents.BaseAgent
+import dev.aurakai.auraframefx.aura.AuraAgent
+import dev.aurakai.auraframefx.kai.KaiAgent
+import dev.aurakai.auraframefx.model.AgentType
 import dev.aurakai.auraframefx.model.agent_states.ProcessingState
 import dev.aurakai.auraframefx.model.agent_states.VisionState
 import kotlinx.coroutines.CoroutineScope
@@ -34,7 +38,12 @@ class CascadeAgent @Inject constructor(
     private val kaiAgent: KaiAgent,
     private val memoryManager: dev.aurakai.auraframefx.ai.memory.MemoryManager,
     private val contextManager: dev.aurakai.auraframefx.ai.context.ContextManager
-) : BaseAgent {
+) : BaseAgent(
+    agentName = "CascadeAgent",
+    agentType = AgentType.ORCHESTRATOR,
+    contextManager = contextManager,
+    memoryManager = memoryManager
+) {
 
     private val scope = CoroutineScope(Dispatchers.Default + Job())
 
@@ -746,5 +755,18 @@ class CascadeAgent @Inject constructor(
         val runtime = Runtime.getRuntime()
         val usedMemory = runtime.totalMemory() - runtime.freeMemory()
         return usedMemory.toFloat() / runtime.maxMemory().toFloat()
+    }
+
+    // BaseAgent abstract method implementation
+    override suspend fun processRequest(
+        request: dev.aurakai.auraframefx.model.AiRequest,
+        context: String
+    ): dev.aurakai.auraframefx.model.AgentResponse {
+        // Delegate to the string-based processRequest method
+        val response = processRequest(request.prompt)
+        return dev.aurakai.auraframefx.model.AgentResponse(
+            content = response,
+            confidence = 0.90f
+        )
     }
 }
