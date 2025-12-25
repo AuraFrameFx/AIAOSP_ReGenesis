@@ -2,8 +2,8 @@ package dev.aurakai.auraframefx.ai.services
 
 import android.content.Context
 import dev.aurakai.auraframefx.ai.clients.VertexAIClient
-import dev.aurakai.auraframefx.context.ContextManager
-import dev.aurakai.auraframefx.data.logging.AuraFxLogger
+import dev.aurakai.auraframefx.ai.context.ContextManager
+import dev.aurakai.auraframefx.utils.AuraFxLogger
 import dev.aurakai.auraframefx.model.AgentResponse
 import dev.aurakai.auraframefx.model.AiRequest
 import dev.aurakai.auraframefx.security.SecurityContext

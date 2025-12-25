@@ -1,34 +1,48 @@
 package dev.aurakai.auraframefx.utils
 
 /**
- * Genesis Logger Interface
+ * Genesis Logger Interface - Complete
  */
 interface AuraFxLogger {
-    fun info(tag: String, message: String)
+    fun debug(tag: String, message: String, throwable: Throwable? = null)
+    fun info(tag: String, message: String, throwable: Throwable? = null)
+    fun warn(tag: String, message: String, throwable: Throwable? = null)
     fun error(tag: String, message: String, throwable: Throwable? = null)
-    fun debug(tag: String, message: String)
-    fun warn(tag: String, message: String)
+    fun security(tag: String, message: String, throwable: Throwable? = null)
+
+    fun performance(
+        tag: String,
+        operation: String,
+        durationMs: Long,
+        metadata: Map<String, Any> = emptyMap()
+    )
+
+    fun userInteraction(
+        tag: String,
+        action: String,
+        metadata: Map<String, Any> = emptyMap()
+    )
+
+    fun aiOperation(
+        tag: String,
+        operation: String,
+        confidence: Float,
+        metadata: Map<String, Any> = emptyMap()
+    )
+
+    fun setLoggingEnabled(enabled: Boolean)
+    fun setLogLevel(level: LogLevel)
+    suspend fun flush()
+    fun cleanup()
 }
 
 /**
- * Default Logger Implementation
+ * Log levels for AuraFxLogger
  */
-class DefaultAuraFxLogger : AuraFxLogger {
-
-    override fun info(tag: String, message: String) {
-        println("INFO [$tag]: $message")
-    }
-
-    override fun error(tag: String, message: String, throwable: Throwable?) {
-        println("ERROR [$tag]: $message")
-        throwable?.printStackTrace()
-    }
-
-    override fun debug(tag: String, message: String) {
-        println("DEBUG [$tag]: $message")
-    }
-
-    override fun warn(tag: String, message: String) {
-        println("WARN [$tag]: $message")
-    }
+enum class LogLevel {
+    DEBUG,
+    INFO,
+    WARN,
+    ERROR,
+    SECURITY
 }
