@@ -18,7 +18,9 @@
       "Bash(git push:*)",
       "Bash(git rm:*)",
       "Bash(git checkout:*)",
-      "Bash(git reset:*)"
+      "Bash(git reset:*)",
+      "Bash(git tag:*)",
+      "Bash(ls -la \"C:\\Users\\Wehtt\\Downloads\\Finale\\app\\src\\main\\java\\dev\\aurakai\\auraframefx\\model\"\" 2>&1 || echo \"Directory does not exist \")"
     ]
   }
 }
