@@ -29,109 +29,97 @@ import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
-abstract class OracleDriveModule {
+object OracleDriveModule {
 
-    @Binds
+    @Provides
     @Singleton
-    abstract fun bindSecureFileService(
+    fun provideSecureFileService(
         impl: GenesisSecureFileService,
-    ): SecureFileService
+    ): SecureFileService = impl
 
-    @Binds
+    @Provides
     @Singleton
-    abstract fun bindOracleDriveService(
+    fun provideOracleDriveService(
         impl: OracleDriveServiceImpl,
-    ): OracleDriveService
+    ): OracleDriveService = impl
 
-    @Binds
+    @Provides
     @Singleton
-    abstract fun bindCloudStorageProvider(
+    fun provideCloudStorageProvider(
         impl: CloudStorageProviderImpl,
-    ): CloudStorageProvider
+    ): CloudStorageProvider = impl
 
-    companion object {
-        @Provides
-        @Singleton
-        fun provideOkHttpClient(
-            securityContext: SecurityContext,
-            cryptoManager: CryptographyManager,
-        ): OkHttpClient {
-            val logging = HttpLoggingInterceptor().apply {
-                level = HttpLoggingInterceptor.Level.BASIC
+    @Provides
+    @Singleton
+    fun provideOkHttpClient(
+        securityContext: SecurityContext,
+        cryptoManager: CryptographyManager,
+    ): OkHttpClient {
+        val logging = HttpLoggingInterceptor().apply {
+            level = HttpLoggingInterceptor.Level.BASIC
+        }
+
+        return OkHttpClient.Builder()
+            .addInterceptor { chain ->
+                val request = chain.request().newBuilder()
+                    .addHeader("X-Security-Token", cryptoManager.generateSecureToken())
+                    .addHeader("X-Request-ID", java.util.UUID.randomUUID().toString())
+                    .build()
+                chain.proceed(request)
             }
+            .addInterceptor(logging)
+            .connectTimeout(30, TimeUnit.SECONDS)
+            .readTimeout(30, TimeUnit.SECONDS)
+            .writeTimeout(30, TimeUnit.SECONDS)
+            .build()
+    }
 
-            return OkHttpClient.Builder()
-                .addInterceptor { chain ->
-                    val request = chain.request().newBuilder()
-                        .addHeader("X-Security-Token", cryptoManager.generateSecureToken())
-                        .addHeader("X-Request-ID", java.util.UUID.randomUUID().toString())
-                        .build()
-                    chain.proceed(request)
-                }
-                .addInterceptor(logging)
-                .connectTimeout(30, TimeUnit.SECONDS)
-                .readTimeout(30, TimeUnit.SECONDS)
-                .writeTimeout(30, TimeUnit.SECONDS)
-                .build()
-        }
+    @Provides
+    @Singleton
+    fun provideGenesisCryptographyManager(
+        @ApplicationContext context: Context,
+    ): CryptographyManager {
+        return CryptographyManager.getInstance(context)
+    }
 
-        @Provides
-        @Singleton
-        fun provideGenesisCryptographyManager(
-            @ApplicationContext context: Context,
-        ): CryptographyManager {
-            return CryptographyManager.getInstance(context)
-        }
+    @Provides
+    @Singleton
+    fun provideSecureStorage(
+        @ApplicationContext context: Context,
+        cryptoManager: CryptographyManager,
+    ): SecureStorage {
+        return SecureStorage.getInstance(context, cryptoManager)
+    }
 
-        @Provides
-        @Singleton
-        fun provideSecureStorage(
-            @ApplicationContext context: Context,
-            cryptoManager: CryptographyManager,
-        ): SecureStorage {
-            return SecureStorage.getInstance(context, cryptoManager)
-        }
+    @Provides
+    @Singleton
+    fun provideOracleDriveApi(
+        client: OkHttpClient,
+        securityContext: SecurityContext,
+    ): OracleDriveApi {
+        return Retrofit.Builder()
+            .baseUrl(securityContext.getApiBaseUrl() + "/oracle/drive/")
+            .client(client)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+            .create(OracleDriveApi::class.java)
+    }
 
-        @Provides
-        @Singleton
-        fun provideSecureFileService(
-            @ApplicationContext context: Context,
-            cryptoManager: CryptographyManager,
-            secureStorage: SecureStorage,
-        ): GenesisSecureFileService {
-            return GenesisSecureFileService(context, cryptoManager, secureStorage)
-        }
-
-        @Provides
-        @Singleton
-        fun provideOracleDriveApi(
-            client: OkHttpClient,
-            securityContext: SecurityContext,
-        ): OracleDriveApi {
-            return Retrofit.Builder()
-                .baseUrl(securityContext.getApiBaseUrl() + "/oracle/drive/")
-                .client(client)
-                .addConverterFactory(GsonConverterFactory.create())
-                .build()
-                .create(OracleDriveApi::class.java)
-        }
-
-        @Provides
-        @Singleton
-        fun provideOracleDriveService(
-            genesisAgent: GenesisAgent,
-            auraAgent: AuraAgent,
-            kaiAgent: KaiAgent,
-            securityContext: SecurityContext,
-            oracleDriveApi: OracleDriveApi,
-        ): OracleDriveServiceImpl {
-            return OracleDriveServiceImpl(
-                genesisAgent = genesisAgent,
-                auraAgent = auraAgent,
-                kaiAgent = kaiAgent,
-                securityContext = securityContext,
-                oracleDriveApi = oracleDriveApi
-            )
-        }
+    @Provides
+    @Singleton
+    fun provideOracleDriveServiceImpl(
+        genesisAgent: GenesisAgent,
+        auraAgent: AuraAgent,
+        kaiAgent: KaiAgent,
+        securityContext: SecurityContext,
+        oracleDriveApi: OracleDriveApi,
+    ): OracleDriveServiceImpl {
+        return OracleDriveServiceImpl(
+            genesisAgent = genesisAgent,
+            auraAgent = auraAgent,
+            kaiAgent = kaiAgent,
+            securityContext = securityContext,
+            oracleDriveApi = oracleDriveApi
+        )
     }
 }
