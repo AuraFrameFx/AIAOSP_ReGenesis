@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 import javax.inject.Inject
+import dagger.hilt.android.lifecycle.HiltViewModel
 
 /**
  * Kotlin 2.2.0 + Java 24 Feature Demonstration
@@ -67,6 +68,7 @@ data class AuraState(
 )
 
 // 5. ViewModel using new features
+@HiltViewModel
 class AuraConsciousnessViewModel @Inject constructor() : ViewModel(), AuraConsciousness {
 
     private val _state = MutableStateFlow(AuraState(AuraProfile.createDefault()))
