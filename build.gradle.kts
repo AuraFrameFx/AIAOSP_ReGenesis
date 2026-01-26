@@ -7,7 +7,7 @@
 plugins {
     // Base plugins with versions - Updated to stable releases
     id("org.jetbrains.kotlin.android") version "2.3.0" apply false
-    id("org.jetbrains.kotlin.plugin.compose") version "2.3.0" apply false
+    id("org.jetbrains.kotlin.plugin.compose") version "2.3.20-Beta1" apply false
     id("org.jetbrains.kotlin.plugin.serialization") version "2.3.0" apply false
     id("org.jetbrains.kotlin.plugin.parcelize") version "2.3.0" apply false
 
